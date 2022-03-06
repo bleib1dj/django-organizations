@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2012-2015, Ben Lopatin and contributors
+# Copyright (c) 2012-2019, Ben Lopatin and contributors
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,47 +23,95 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf.urls import url
+from django.urls import include
+from django.urls import path
 from django.contrib.auth.decorators import login_required
 
-from organizations import views
+from organizations.views import default as views
 
+
+# app_name = "organizations"
 
 urlpatterns = [
-    # Organization URLs
-    url(r'^$',
+    path(
+        "",
         view=login_required(views.OrganizationList.as_view()),
-        name="organization_list"),
-    url(r'^add/$',
+        name="organization_list",
+    ),
+    path(
+        "add/",
         view=login_required(views.OrganizationCreate.as_view()),
-        name="organization_add"),
-    url(r'^(?P<organization_pk>[\d]+)/$',
-        view=login_required(views.OrganizationDetail.as_view()),
-        name="organization_detail"),
-    url(r'^(?P<organization_pk>[\d]+)/edit/$',
-        view=login_required(views.OrganizationUpdate.as_view()),
-        name="organization_edit"),
-    url(r'^(?P<organization_pk>[\d]+)/delete/$',
-        view=login_required(views.OrganizationDelete.as_view()),
-        name="organization_delete"),
-
-    # Organization user URLs
-    url(r'^(?P<organization_pk>[\d]+)/people/$',
-        view=login_required(views.OrganizationUserList.as_view()),
-        name="organization_user_list"),
-    url(r'^(?P<organization_pk>[\d]+)/people/add/$',
-        view=login_required(views.OrganizationUserCreate.as_view()),
-        name="organization_user_add"),
-    url(r'^(?P<organization_pk>[\d]+)/people/(?P<user_pk>[\d]+)/remind/$',
-        view=login_required(views.OrganizationUserRemind.as_view()),
-        name="organization_user_remind"),
-    url(r'^(?P<organization_pk>[\d]+)/people/(?P<user_pk>[\d]+)/$',
-        view=login_required(views.OrganizationUserDetail.as_view()),
-        name="organization_user_detail"),
-    url(r'^(?P<organization_pk>[\d]+)/people/(?P<user_pk>[\d]+)/edit/$',
-        view=login_required(views.OrganizationUserUpdate.as_view()),
-        name="organization_user_edit"),
-    url(r'^(?P<organization_pk>[\d]+)/people/(?P<user_pk>[\d]+)/delete/$',
-        view=login_required(views.OrganizationUserDelete.as_view()),
-        name="organization_user_delete"),
+        name="organization_add",
+    ),
+    path(
+        "<int:organization_pk>/",
+        include(
+            [
+                path(
+                    "",
+                    view=login_required(views.OrganizationDetail.as_view()),
+                    name="organization_detail",
+                ),
+                path(
+                    "edit/",
+                    view=login_required(views.OrganizationUpdate.as_view()),
+                    name="organization_edit",
+                ),
+                path(
+                    "delete/",
+                    view=login_required(views.OrganizationDelete.as_view()),
+                    name="organization_delete",
+                ),
+                path(
+                    "people/",
+                    include(
+                        [
+                            path(
+                                "",
+                                view=login_required(
+                                    views.OrganizationUserList.as_view()
+                                ),
+                                name="organization_user_list",
+                            ),
+                            path(
+                                "add/",
+                                view=login_required(
+                                    views.OrganizationUserCreate.as_view()
+                                ),
+                                name="organization_user_add",
+                            ),
+                            path(
+                                "<int:user_pk>/remind/",
+                                view=login_required(
+                                    views.OrganizationUserRemind.as_view()
+                                ),
+                                name="organization_user_remind",
+                            ),
+                            path(
+                                "<int:user_pk>/",
+                                view=login_required(
+                                    views.OrganizationUserDetail.as_view()
+                                ),
+                                name="organization_user_detail",
+                            ),
+                            path(
+                                "<int:user_pk>/edit/",
+                                view=login_required(
+                                    views.OrganizationUserUpdate.as_view()
+                                ),
+                                name="organization_user_edit",
+                            ),
+                            path(
+                                "<int:user_pk>/delete/",
+                                view=login_required(
+                                    views.OrganizationUserDelete.as_view()
+                                ),
+                                name="organization_user_delete",
+                            ),
+                        ]
+                    ),
+                ),
+            ]
+        ),
+    ),
 ]
